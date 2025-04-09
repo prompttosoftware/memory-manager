@@ -1,0 +1,34 @@
+# Use an official Node.js runtime as a parent image
+# Alpine versions are smaller but might lack some dependencies sometimes
+FROM node:23-alpine
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json (or yarn.lock)
+COPY package*.json ./
+
+# Install app dependencies
+# Use 'npm ci' for deterministic installs based on package-lock.json in production
+RUN npm install
+
+# Copy the rest of the application code into the container
+COPY . .
+
+# Make port 3000 available to the world outside this container
+EXPOSE 3000
+
+# Define environment variables (can be overridden at runtime)
+ENV NODE_ENV=production
+ENV QDRANT_HOST=qdrant
+ENV QDRANT_PORT=6333
+ENV QDRANT_COLLECTION=streamer_memory
+# Add other ENV vars if needed, matching your .env defaults
+
+# Run the app when the container launches
+CMD ["node", "server.js"]
+
+# Optional: Transformers.js caches models. If cache size is an issue,
+# you might want to map a volume to the cache directory or clear it.
+# Default cache is usually ~/.cache/huggingface/hub
+# RUN rm -rf /root/.cache/huggingface/hub/* # Example cleanup during build (less ideal)

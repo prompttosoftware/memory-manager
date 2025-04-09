@@ -1,0 +1,31 @@
+{
+    "name": "memory-manager",
+    "version": "1.0.0",
+    "description": "Memory management API for AI Streamer using Qdrant",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js",
+      "dev": "nodemon server.js"
+    },
+    "keywords": [
+      "ai",
+      "streamer",
+      "memory",
+      "qdrant",
+      "vector",
+      "database"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "@qdrant/js-client": "^1.9.0",
+      "@xenova/transformers": "^2.17.1",
+      "dotenv": "^16.4.5",
+      "express": "^4.19.2",
+      "node-schedule": "^2.1.1",
+      "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+      "nodemon": "^3.1.0"
+    }
+}
