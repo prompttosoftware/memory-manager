@@ -9,14 +9,12 @@ const MIN_AGE_SECONDS = process.env.MIN_AGE_BEFORE_TRIM_SECONDS
     ? parseInt(process.env.MIN_AGE_BEFORE_TRIM_SECONDS, 10)
     : null;
 
-
 async function runTrimming() {
     console.log(`Starting memory trimming process. Threshold: ${TRIM_THRESHOLD}`);
     const currentTime = Date.now() / 1000; // Seconds
     let offset = null;
     let totalScanned = 0;
     let totalDeleted = 0;
-    const idsToDeleteBatch = [];
 
     // Prepare filter if minimum age is set
     let scrollFilter = null;
@@ -29,9 +27,8 @@ async function runTrimming() {
                 }
             ]
         };
-         console.log(`Trimming filter: Only considering points older than ${MIN_AGE_SECONDS} seconds.`);
+        console.log(`Trimming filter: Only considering points older than ${MIN_AGE_SECONDS} seconds.`);
     }
-
 
     try {
         do {
@@ -45,41 +42,34 @@ async function runTrimming() {
 
             const points = scrollResponse.points;
             totalScanned += points.length;
+            // Process deletion for this scroll batch independently.
+            const idsToDeleteBatch = [];
 
             for (const point of points) {
                 if (!point.payload) continue; // Skip if payload is missing
 
                 const trimScore = calculateTrimScore(point.payload, currentTime);
-
                 if (trimScore > TRIM_THRESHOLD) {
                     idsToDeleteBatch.push(point.id);
                 }
             }
 
-            // Delete collected IDs if batch is full or if this is the last page
-            if (idsToDeleteBatch.length >= TRIM_BATCH_SIZE || (points.length === 0 && idsToDeleteBatch.length > 0) || (scrollResponse.next_page_offset === null && idsToDeleteBatch.length > 0)) {
-                if (idsToDeleteBatch.length > 0) {
-                    console.log(`Attempting to delete ${idsToDeleteBatch.length} points...`);
-                    await qdrantClient.delete(collectionName, {
-                        points: idsToDeleteBatch
-                    });
-                    totalDeleted += idsToDeleteBatch.length;
-                    console.log(`Deleted ${idsToDeleteBatch.length} points. Total deleted so far: ${totalDeleted}`);
-                    idsToDeleteBatch.length = 0; // Clear the batch
-                }
+            // Immediately delete candidates for the current scroll batch if any.
+            if (idsToDeleteBatch.length > 0) {
+                console.log(`Attempting to delete ${idsToDeleteBatch.length} points...`);
+                // Pass a shallow copy so that later modification (clearing the array) does not affect the deletion call.
+                await qdrantClient.delete(collectionName, { points: [...idsToDeleteBatch] });
+                totalDeleted += idsToDeleteBatch.length;
+                console.log(`Deleted ${idsToDeleteBatch.length} points. Total deleted so far: ${totalDeleted}`);
             }
 
             offset = scrollResponse.next_page_offset;
-            // Optional: Add a small delay between batches if needed
-            // await new Promise(resolve => setTimeout(resolve, 50));
-
-        } while (offset !== null); // Continue until Qdrant returns null offset
+        } while (offset !== null);
 
         console.log(`Memory trimming finished. Scanned: ${totalScanned}, Deleted: ${totalDeleted}.`);
 
     } catch (error) {
         console.error("Error during memory trimming:", error);
-        // Handle potential partial failures if needed
     }
 }
 

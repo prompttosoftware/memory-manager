@@ -1,6 +1,8 @@
-# Use an official Node.js runtime as a parent image
-# Alpine versions are smaller but might lack some dependencies sometimes
-FROM node:23-alpine
+# syntax=docker/dockerfile:1
+
+ARG NODE_VERSION=22.11.0
+
+FROM node:${NODE_VERSION}-slim
 
 # Set the working directory in the container
 WORKDIR /app
