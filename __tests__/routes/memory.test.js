@@ -1,33 +1,52 @@
 // __tests__/routes/memory.test.js
+import { describe, it, beforeEach, expect, vi } from 'vitest';
+
 // --- Mock dependencies ---
 // Mock Qdrant client methods used in the routes
-const mockUpsertPoints = jest.fn();
-const mockSearch = jest.fn();
-const mockSetPayload = jest.fn();
-jest.mock('../../config/qdrantClient', () => ({
-    upsertPoints: mockUpsertPoints,
-    search: mockSearch,
-    setPayload: mockSetPayload,
-    // Add other methods if needed by routes in the future
-}));
+vi.mock('../../config/qdrantClient', async () => {
+    const actual = await vi.importActual('../../config/qdrantClient');
+    return {
+      // Note: The module exports a default export.
+      default: {
+        ...actual.default,
+        upsertPoints: vi.fn(),
+        search: vi.fn(),
+        setPayload: vi.fn(),
+      },
+    };
+});
 
 // Mock Embedding Helper
-const mockGetEmbedding = jest.fn();
-jest.mock('../../config/embeddingHelper', () => ({
-    getEmbedding: mockGetEmbedding,
-}));
-
+vi.mock('../../config/embeddingHelper', async () => {
+    const actual = await vi.importActual('../../config/embeddingHelper');
+    return {
+      ...actual,
+      getEmbedding: vi.fn(),
+    };
+});
+  
 // Mock State Utils
-const mockSetLastRetrievalCount = jest.fn();
-const mockGetLastRetrievalCount = jest.fn().mockReturnValue(50); // Default mock value
-jest.mock('../../utils/state', () => ({
-    setLastRetrievalCount: mockSetLastRetrievalCount,
-    getLastRetrievalCount: mockGetLastRetrievalCount,
-}));
+vi.mock('../../utils/state', async () => {
+    const actual = await vi.importActual('../../utils/state');
+    return {
+      ...actual,
+      setLastRetrievalCount: vi.fn(),
+      getLastRetrievalCount: vi.fn().mockReturnValue(50),
+    };
+});
 
-const request = require('supertest');
-const express = require('express');
-const memoryRoutes = require('../../routes/memory');
+import qdrantClient from '../../config/qdrantClient.js';
+const { upsertPoints: mockUpsertPoints, search: mockSearch, setPayload: mockSetPayload } = qdrantClient;
+
+import * as embeddingHelper from '../../config/embeddingHelper.js';
+const { getEmbedding: mockGetEmbedding } = embeddingHelper;
+
+import * as stateUtils from '../../utils/state.js';
+const { setLastRetrievalCount: mockSetLastRetrievalCount, getLastRetrievalCount: mockGetLastRetrievalCount } = stateUtils;
+
+import request from 'supertest';
+import express from 'express';
+import memoryRoutes from '../../routes/memory.js';
 
 // --- Setup Express App for Testing ---
 const app = express();

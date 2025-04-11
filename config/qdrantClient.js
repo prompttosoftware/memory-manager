@@ -1,7 +1,8 @@
-const { QdrantClient } = require('@qdrant/js-client-rest');
-require('dotenv').config();
+import { QdrantClient } from '@qdrant/js-client-rest';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const client = new QdrantClient({
+const qdrantClient = new QdrantClient({
     host: process.env.QDRANT_HOST || 'localhost',
     port: parseInt(process.env.QDRANT_PORT || '6333', 10),
     // Uncomment the line below if you have API key authentication enabled
@@ -15,7 +16,7 @@ console.log(`Qdrant client configured for ${process.env.QDRANT_HOST}:${process.e
 async function ensureCollectionExists() {
     const collectionName = process.env.QDRANT_COLLECTION || 'streamer_memory';
     try {
-        await client.getCollection(collectionName);
+        await qdrantClient.getCollection(collectionName);
         console.log(`Collection "${collectionName}" already exists.`);
     } catch (error) {
         // Basic check for "Not Found" - might need refinement based on exact error
@@ -32,4 +33,4 @@ async function ensureCollectionExists() {
 // Run check on startup (don't await if startup time is critical)
 ensureCollectionExists();
 
-module.exports = client;
+export default qdrantClient;

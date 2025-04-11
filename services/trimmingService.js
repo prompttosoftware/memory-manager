@@ -1,6 +1,8 @@
-const qdrantClient = require('../config/qdrantClient');
-const { calculateTrimScore } = require('./memoryLogic');
-require('dotenv').config();
+// services/trimmingService.js
+import qdrantClient from '../config/qdrantClient.js';
+import { calculateTrimScore } from './memoryLogic.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const collectionName = process.env.QDRANT_COLLECTION || 'streamer_memory';
 const TRIM_THRESHOLD = parseFloat(process.env.TRIM_THRESHOLD || '500000');
@@ -9,7 +11,7 @@ const MIN_AGE_SECONDS = process.env.MIN_AGE_BEFORE_TRIM_SECONDS
     ? parseInt(process.env.MIN_AGE_BEFORE_TRIM_SECONDS, 10)
     : null;
 
-async function runTrimming() {
+export async function runTrimming() {
     console.log(`Starting memory trimming process. Threshold: ${TRIM_THRESHOLD}`);
     const currentTime = Date.now() / 1000; // Seconds
     let offset = null;
@@ -72,5 +74,3 @@ async function runTrimming() {
         console.error("Error during memory trimming:", error);
     }
 }
-
-module.exports = { runTrimming };

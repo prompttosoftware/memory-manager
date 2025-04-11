@@ -1,9 +1,9 @@
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const qdrantClient = require('../config/qdrantClient');
-const { getEmbedding } = require('../config/embeddingHelper');
-const { calculateInitialSpecificity, calculateAccessSpecificity } = require('../services/memoryLogic');
-const { setLastRetrievalCount, getLastRetrievalCount } = require('../utils/state');
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import qdrantClient from '../config/qdrantClient.js';
+import { getEmbedding } from '../config/embeddingHelper.js';
+import { calculateInitialSpecificity, calculateAccessSpecificity } from '../services/memoryLogic.js';
+import { setLastRetrievalCount, getLastRetrievalCount } from '../utils/state.js';
 
 const router = express.Router();
 const collectionName = process.env.QDRANT_COLLECTION || 'streamer_memory';
@@ -115,4 +115,4 @@ router.post('/search', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

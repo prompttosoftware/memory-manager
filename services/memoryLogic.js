@@ -1,24 +1,25 @@
 // services/memoryLogic.js
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const K_MAX = parseInt(process.env.K_MAX || '100', 10);
 const W_AGE = parseFloat(process.env.W_AGE || '1.0');
 const W_RECENCY = parseFloat(process.env.W_RECENCY || '1.5');
 const C_USAGE = parseFloat(process.env.C_USAGE || '1.0');
 
-function calculateInitialSpecificity(lastK) {
+export function calculateInitialSpecificity(lastK) {
     // Handle edge case of no previous retrieval or very few results
     if (lastK <= 5) return 1.0;
     return Math.max(0.1, 1.0 - (lastK / K_MAX));
 }
 
-function calculateAccessSpecificity(k) {
+export function calculateAccessSpecificity(k) {
      // Treat 0 results as maximum specificity (might indicate error or empty DB)
     if (k <= 0) return 1.0;
     return Math.max(0.1, 1.0 - (k / K_MAX));
 }
 
-function calculateTrimScore(memoryPayload, currentTime) {
+export function calculateTrimScore(memoryPayload, currentTime) {
     if (!memoryPayload || typeof memoryPayload !== 'object') {
         console.warn("Invalid memory payload provided to calculateTrimScore");
         return Infinity; // Ensure invalid items are trimmed
@@ -44,10 +45,3 @@ function calculateTrimScore(memoryPayload, currentTime) {
     const score = (W_AGE * age + W_RECENCY * timeSinceLastAccess) / usageFactor;
     return score;
 }
-
-
-module.exports = {
-    calculateInitialSpecificity,
-    calculateAccessSpecificity,
-    calculateTrimScore
-};

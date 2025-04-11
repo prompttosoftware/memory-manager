@@ -3,17 +3,12 @@ const state = {
     last_retrieval_raw_count: 50 // Initialize with a default guess
 };
 
-function setLastRetrievalCount(count) {
+export function setLastRetrievalCount(count) {
     if (typeof count === 'number' && count >= 0) {
         state.last_retrieval_raw_count = count;
     }
 }
 
-function getLastRetrievalCount() {
+export function getLastRetrievalCount() {
     return state.last_retrieval_raw_count;
 }
-
-module.exports = {
-    setLastRetrievalCount,
-    getLastRetrievalCount
-};

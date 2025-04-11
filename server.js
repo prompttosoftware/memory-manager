@@ -1,14 +1,20 @@
-require('dotenv').config();
-const express = require('express');
-const schedule = require('node-schedule');
-const memoryRoutes = require('./routes/memory');
-const { runTrimming } = require('./services/trimmingService');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { env } from '@xenova/transformers';
+env.allowRemoteModels = true;
+env.localFilesOnly = false;
+
+import express from'express';
+import schedule from 'node-schedule';
+import memoryRoutes from './routes/memory.js';
+import { runTrimming } from './services/trimmingService.js';
 // Ensure embedding model is loaded (optional warm-up)
-require('./config/embeddingHelper');
+import './config/embeddingHelper.js';
 
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3011;
 
 // --- Middleware ---
 app.use(express.json()); // Parse JSON request bodies

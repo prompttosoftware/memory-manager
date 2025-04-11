@@ -1,18 +1,26 @@
 // __tests__/services/trimmingService.test.js
+import { describe, it, beforeEach, expect, vi } from 'vitest';
+
 // --- Mock dependencies ---
-const mockScroll = jest.fn();
-const mockDelete = jest.fn();
-jest.mock('../../config/qdrantClient', () => ({
-    scroll: mockScroll,
-    delete: mockDelete,
-}));
+vi.mock('../../config/qdrantClient', async () => {
+  const actual = await vi.importActual('../../config/qdrantClient');
+  return {
+    default: {
+      ...actual.default,
+      scroll: vi.fn(),
+      delete: vi.fn(),
+    },
+  };
+});
 
 // Mock memory logic only for calculateTrimScore
-const mockCalculateTrimScore = jest.fn();
-jest.mock('../../services/memoryLogic', () => ({
-    // Keep other exports if trimmingService used them, otherwise just mock the one needed
-    calculateTrimScore: mockCalculateTrimScore
-}));
+vi.mock('../../services/memoryLogic', async () => {
+    const actual = await vi.importActual('../../services/memoryLogic');
+    return {
+      ...actual,
+      calculateTrimScore: vi.fn(),
+    };
+});
 
 // Mock Env Vars for Trimming
 const MOCK_TRIM_THRESHOLD = 10000; // Example threshold for testing
@@ -21,7 +29,13 @@ process.env.TRIM_THRESHOLD = MOCK_TRIM_THRESHOLD;
 process.env.TRIM_BATCH_SIZE = MOCK_TRIM_BATCH_SIZE;
 // process.env.MIN_AGE_BEFORE_TRIM_SECONDS = '...'; // Set if you want to test filtering
 
-const { runTrimming } = require('../../services/trimmingService');
+import qdrantClient from '../../config/qdrantClient.js';
+const { scroll: mockScroll, delete: mockDelete } = qdrantClient;
+
+import * as memoryLogic from '../../services/memoryLogic.js';
+const { calculateTrimScore: mockCalculateTrimScore } = memoryLogic;
+
+import { runTrimming } from '../../services/trimmingService.js';
 
 describe('Trimming Service', () => {
 
@@ -129,7 +143,7 @@ describe('Trimming Service', () => {
          const scrollError = new Error("Scroll failed");
          mockScroll.mockRejectedValue(scrollError);
          // Use console.error spy to check if error is logged
-         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
          await runTrimming();
 
@@ -145,7 +159,7 @@ describe('Trimming Service', () => {
          mockScroll.mockResolvedValueOnce({ points: [pointToDelete], next_page_offset: null });
          const deleteError = new Error("Delete failed");
          mockDelete.mockRejectedValue(deleteError);
-          const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+          const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 
          await runTrimming();

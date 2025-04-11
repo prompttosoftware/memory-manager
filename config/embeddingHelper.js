@@ -1,4 +1,5 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const modelName = process.env.EMBEDDING_MODEL_NAME || 'Xenova/all-MiniLM-L6-v2';
 let pipelineInstance = null;
@@ -11,8 +12,8 @@ async function getPipeline() {
             const { pipeline, env } = await import('@xenova/transformers');
             // Optional: Disable local model download progress bars
             env.allowLocalModels = true;
-            env.remoteHost = ''; // Avoid checking remote availability if only using local
-            env.allowRemoteModels = false; // Ensure local usage if intended
+            // env.remoteHost = ''; // Avoid checking remote availability if only using local
+            env.allowRemoteModels = true;
             console.log(`Loading embedding model: ${modelName}... (This might take a while the first time)`);
             // 'feature-extraction' is the task for getting embeddings
             pipelineInstance = await pipeline('feature-extraction', modelName, { quantized: false }); // Set quantized:true for lower RAM usage
@@ -25,7 +26,7 @@ async function getPipeline() {
     return pipelineInstance;
 }
 
-async function getEmbedding(text) {
+export async function getEmbedding(text) {
     if (!text || typeof text !== 'string') {
         throw new Error("Invalid input text for embedding.");
     }
@@ -45,9 +46,6 @@ async function getEmbedding(text) {
 
 // Warm up the model on startup (optional, but avoids delay on first request)
 getPipeline().catch(err => console.error("Error during model warm-up:", err));
-
-
-module.exports = { getEmbedding };
 
 /*
 // --- Example for OpenAI (requires `npm install openai`) ---

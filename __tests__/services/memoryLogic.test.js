@@ -1,14 +1,15 @@
 // __tests__/services/memoryLogic.test.js
-const {
+import { describe, it, beforeEach, expect, vi } from 'vitest';
+import {
     calculateInitialSpecificity,
     calculateAccessSpecificity,
     calculateTrimScore
-} = require('../../services/memoryLogic');
+} from '../../services/memoryLogic.js';
 
 // --- Mock environment variables used by memoryLogic ---
 // It's often cleaner to mock process.env, but for simplicity here,
 // we'll rely on the defaults set in the logic file or assume standard values.
-// If you heavily rely on process.env, consider using jest.spyOn(process, 'env', 'get').mockReturnValue(...)
+// If you heavily rely on process.env, consider using vi.spyOn(process, 'env', 'get').mockReturnValue(...)
 // or libraries like 'dotenv-testing'. For this example, we assume K_MAX=100, W_AGE=1.0, W_RECENCY=1.5, C_USAGE=1.0
 
 describe('Memory Logic Service', () => {
