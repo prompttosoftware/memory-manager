@@ -1,10 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
-import { env } from '@xenova/transformers';
-env.allowRemoteModels = true;
-env.localFilesOnly = false;
-
 import express from'express';
 import schedule from 'node-schedule';
 import memoryRoutes from './routes/memory.js';
