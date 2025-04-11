@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const modelPath = process.env.EMBEDDING_MODEL_PATH || '/app/model';
 const modelName = process.env.EMBEDDING_MODEL_NAME || 'Xenova/all-MiniLM-L6-v2';
 let pipelineInstance = null;
 
@@ -12,11 +13,12 @@ async function getPipeline() {
             const { pipeline, env } = await import('@xenova/transformers');
             // Optional: Disable local model download progress bars
             env.allowLocalModels = true;
-            // env.remoteHost = ''; // Avoid checking remote availability if only using local
-            env.allowRemoteModels = true;
-            console.log(`Loading embedding model: ${modelName}... (This might take a while the first time)`);
+            env.remoteHost = ''; // Avoid checking remote availability if only using local
+            env.allowRemoteModels = false;
+            env.cacheDir = '/app/model'
+            console.log(`Loading embedding model from: ${modelPath}... (This might take a while the first time)`);
             // 'feature-extraction' is the task for getting embeddings
-            pipelineInstance = await pipeline('feature-extraction', modelName, { quantized: false }); // Set quantized:true for lower RAM usage
+            pipelineInstance = await pipeline('feature-extraction', modelName, { quantized: false, cache_dir: modelPath }); // Set quantized:true for lower RAM usage
             console.log("Embedding model loaded successfully.");
         } catch (error) {
             console.error("Fatal error loading embedding model:", error);

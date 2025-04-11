@@ -17,6 +17,12 @@ RUN npm install
 # Copy the rest of the application code into the container
 COPY . .
 
+# Copy the model directory into the container
+COPY --chown=node:node /model /app/model
+
+# Switch to non-root user
+USER node
+
 # Make port 3011 available to the world outside this container
 EXPOSE 3011
 
@@ -25,6 +31,7 @@ ENV NODE_ENV=production
 ENV QDRANT_HOST=qdrant
 ENV QDRANT_PORT=6333
 ENV QDRANT_COLLECTION=streamer_memory
+ENV TRANSFORMERS_CACHE=/app/model
 # Add other ENV vars if needed, matching your .env defaults
 
 # Run the app when the container launches
