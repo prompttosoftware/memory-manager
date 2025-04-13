@@ -18,7 +18,7 @@ RUN npm install
 COPY . .
 
 # Copy the model directory into the container
-COPY --chown=node:node /model /app/model
+COPY --chown=node:node /model /app/node_modules/@xenova/transformers/models/
 
 # Switch to non-root user
 USER node

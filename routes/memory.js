@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
             }
         };
 
-        await qdrantClient.upsertPoints(collectionName, { points: [point] });
+        await qdrantClient.upsert(collectionName, { points: [point] });
         console.log(`Ingested memory: ${point.id} (Type: ${memory_type}, Initial Score: ${initialWeightedScore.toFixed(2)})`);
         res.status(201).json({ id: point.id, message: 'Memory ingested successfully' });
 

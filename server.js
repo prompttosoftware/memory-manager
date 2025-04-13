@@ -24,18 +24,37 @@ app.get('/', (req, res) => {
 app.use('/api/memory', memoryRoutes); // Mount memory-related routes
 
 // --- Scheduler for Trimming ---
-const trimSchedule = process.env.TRIM_SCHEDULE || '0 4 * * *'; // Default: 4 AM daily
-console.log(`Scheduling memory trimming with rule: "${trimSchedule}"`);
+const trimInterval = process.env.TRIM_INTERVAL; // in minutes
 
-schedule.scheduleJob(trimSchedule, async () => {
-    console.log(`[${new Date().toISOString()}] Running scheduled memory trimming...`);
-    try {
-        await runTrimming();
-        console.log(`[${new Date().toISOString()}] Scheduled memory trimming finished.`);
-    } catch (error) {
-        console.error(`[${new Date().toISOString()}] Error during scheduled memory trimming execution:`, error);
-    }
-});
+if (trimInterval) {
+    // Convert the interval from minutes to milliseconds
+    const intervalMs = parseInt(trimInterval, 10) * 60 * 1000;
+    console.log(`Scheduling memory trimming every ${trimInterval} minute(s).`);
+
+    setInterval(async () => {
+        console.log(`[${new Date().toISOString()}] Running scheduled memory trimming (interval mode)...`);
+        try {
+            await runTrimming();
+            console.log(`[${new Date().toISOString()}] Scheduled memory trimming finished.`);
+        } catch (error) {
+            console.error(`[${new Date().toISOString()}] Error during scheduled memory trimming execution:`, error);
+        }
+    }, intervalMs);
+} else {
+    // Fallback to cron scheduling if TRIM_INTERVAL is not set
+    const trimSchedule = process.env.TRIM_SCHEDULE || '0 4 * * *'; // Default: 4 AM daily
+    console.log(`Scheduling memory trimming with rule: "${trimSchedule}"`);
+
+    schedule.scheduleJob(trimSchedule, async () => {
+        console.log(`[${new Date().toISOString()}] Running scheduled memory trimming...`);
+        try {
+            await runTrimming();
+            console.log(`[${new Date().toISOString()}] Scheduled memory trimming finished.`);
+        } catch (error) {
+            console.error(`[${new Date().toISOString()}] Error during scheduled memory trimming execution:`, error);
+        }
+    });
+}
 
 
 // --- Global Error Handler (Basic) ---

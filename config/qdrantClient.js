@@ -23,7 +23,7 @@ async function ensureCollectionExists() {
         if (error.message && (error.message.includes('Not found') || error.status === 404)) {
             console.log(`Collection "${collectionName}" not found. Consider creating it.`);
             // Optionally create it here if desired, but requires vector params
-            await client.createCollection(collectionName, { vectors: { size: 384, distance: 'Cosine' } }); // Adjust size!
+            await qdrantClient.createCollection(collectionName, { vectors: { size: 384, distance: 'Cosine' } }); // Adjust size!
         } else {
             console.error("Error checking collection:", error);
         }
